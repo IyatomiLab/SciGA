@@ -1,0 +1,27 @@
+## Vision Encoder
+use_beit_v2: True
+vision_config: './benchmark/submodules/x2vlm/configs/config_beit2_large.json'
+image_res: 224
+patch_size: 16
+local_attn_depth: -1
+
+## Text Encoder (& Cross Encoder)
+text_encoder: './benchmark/submodules/bert-large-uncased'
+text_num_hidden_layers: 18
+text_fusion_start_at: 12
+cross_encoder: './benchmark/submodules/bert-large-uncased'
+cross_num_hidden_layers: 18
+
+## Training
+mixed_in_batch: True
+calc_image_bbox_loss: False
+embed_dim: 256
+temp: 0.07
+
+max_words: 40
+max_tokens: 40
+mask_prob: 0.5
+max_masks: 12
+mask_whole_word: True
+skipgram_prb: 0.2
+skipgram_size: 3
