@@ -137,3 +137,85 @@ def abs2fig_retriever_collate_fn_for_intraGA_recommendation(batch: list[tuple]) 
         batch_captions,
         batch_label,
     )
+
+
+# ════════════════════════════════════════════════════════════
+# 📙 Inter-GA Recommendation | (iii - iv) Abs2Fig
+# ════════════════════════════════════════════════════════════
+
+class Abs2FigRetrieverDatasetForInterGARecommendation(Dataset):
+    def __init__(
+        self,
+        paper_id: list[str],
+        research_fields: list[str],
+        abstract: list[str],
+        GA_path: list[str],
+        GA_caption: list[str],
+        tokenizer: Callable[[str | list[str], bool], torch.Tensor | BatchEncoding],
+        transform: Callable[[Image.Image], torch.Tensor],
+    ) -> None:
+        self.paper_id = paper_id
+        self.research_fields = research_fields
+        self.abstract = abstract
+        self.GA_path = GA_path
+        self.GA_caption = GA_caption
+        self.tokenizer = tokenizer
+        self.transform = transform
+
+        self.collate_fn = abs2fig_retriever_collate_fn_for_interGA_recommendation
+
+        Image.MAX_IMAGE_PIXELS = None
+        ImageFile.LOAD_TRUNCATED_IMAGES = True
+
+    def __len__(self):
+        return len(self.paper_id)
+
+    def __getitem__(self, idx) -> tuple[str, list[str], torch.Tensor | BatchEncoding, torch.Tensor, torch.Tensor | BatchEncoding]:
+        paper_id = self.paper_id[idx]
+        research_fields = self.research_fields[idx]
+        abstract = self.abstract[idx]
+        GA_path = self.GA_path[idx]
+        caption = self.GA_caption[idx]
+
+        # Preprocess abstract, GA, and caption
+        tokenized_abstract = self.tokenizer(abstract, batched=False)
+        GA = self.transform(Image.open(GA_path).convert('RGB'))
+        tokenized_caption = self.tokenizer(caption, batched=False)
+
+        return paper_id, research_fields, tokenized_abstract, GA, tokenized_caption
+
+
+def abs2fig_retriever_collate_fn_for_interGA_recommendation(batch: list[tuple]) -> tuple:
+    """
+    Collate function for Abs2Fig Retriever used in Inter-GA Recommendation.
+    The default PyTorch collate function `default_collate()` fails when each sample contains fields like list[str].
+    This function selectively applies `default_collate()` only to tensor-compatible fields, while preserving non-tensor fields in their original structure.
+
+    Args:
+        batch (List[Tuple]): A list of dataset samples, where each sample is a tuple of multiple fields.
+
+    Returns:
+        Tuple: Batched data in the same field order as the dataset output.
+    """
+
+    (
+        batch_paper_id,
+        batch_research_fields,
+        batch_abstract,
+        batch_GA,
+        batch_caption,
+    ) = zip(*batch)
+
+    batch_paper_id, batch_abstract, batch_GA, batch_caption = default_collate([
+        (paper_id, abstract, GA, caption)
+        for paper_id, abstract, GA, caption
+        in zip(batch_paper_id, batch_abstract, batch_GA, batch_caption)
+    ])
+
+    return (
+        batch_paper_id,
+        batch_research_fields,
+        batch_abstract,
+        batch_GA,
+        batch_caption,
+    )

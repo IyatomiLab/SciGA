@@ -277,3 +277,273 @@ class BaseAbs2FigRetrieverLoaderForIntraGARecommendation(ABC):
         """
 
         return self.model
+
+
+# ════════════════════════════════════════════════════════════
+# 📙 Inter-GA Recommendation | (iii - iv) Abs2Fig
+# ════════════════════════════════════════════════════════════
+
+@dataclass
+class Abs2FigRetrieverOutputForInterGARecommendation():
+    """
+    This class defines the output structure for abstract-to-figure retrieval models designed for inter-GA Recommendation.
+
+    Attributes:
+        inter_loss (torch.Tensor): Inter loss.
+        sim_abs2GA (torch.Tensor): Similarity between abstracts and GAs. Shape = [batch_size, batch_size].
+        sim_GA2abs (torch.Tensor): Similarity between GAs and abstracts. Shape = [batch_size, batch_size].
+        abstract_embed (torch.Tensor): Encoded abstracts. Shape = [batch_size, embedding_dim].
+        GAs_embed (torch.Tensor): Encoded GAs. Shape = [batch_size, embedding_dim].
+    """
+
+    inter_loss: torch.Tensor
+    sim_abs2GA: torch.Tensor
+    sim_GA2abs: torch.Tensor
+    abstract_embed: torch.Tensor
+    GA_embed: torch.Tensor
+
+
+class BaseAbs2FigRetrieverForInterGARecommendation(nn.Module):
+    """
+    Base class for abstract-to-figure retrieval models used in Inter-GA Recommendation.
+    This class provides a unified interface for models that retrieve GAs from abstracts,
+    supporting flexible integration of various CLIP-like vision-language backbones (e.g., CLIP, Long-CLIP, BLIP-2).
+
+    Subclasses must implement the following methods:
+        - `get_backbone()`: Get the backbone of the model.
+        - `tokenize()`: Tokenize input texts.
+        - `preprocess_image()`: Preprocess input images.
+        - `encode_text()`: Encode tokenized texts into embeddings.
+        - `encode_image()`: Encode images into embeddings.
+        - `_logit_scale()`: Return the logit scale parameter (used as the temperature τ in contrastive learning).
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    @abstractmethod
+    def get_backbone(self) -> nn.Module:
+        """
+        Get the backbone of the model.
+
+        Returns:
+            nn.Module: The backbone of the model.
+        """
+
+        return NotImplementedError('Subclasses should implement this method')
+
+    @abstractmethod
+    def tokenize(self, text: str | list[str], batched: bool = True) -> torch.Tensor | BatchEncoding:
+        """
+        Tokenize input texts.
+
+        Args:
+            text (Union[str, List[str]]): Input text to be tokenized.
+            batched (bool, optional): If True, the input is treated as a batch and the output will preserve the batch dimension. If False, assumes a single text and squeezes the batch dimension (e.g., shape [max_length]).
+
+        Returns:
+            Union[torch.Tensor, BatchEncoding]: Tokenized text as a tensor. Shape = [batch_size, max_length] or [max_length].
+        """
+
+        return NotImplementedError('Subclasses should implement this method')
+
+    @abstractmethod
+    def preprocess_image(self, image: Image.Image | ImageFile.ImageFile) -> torch.Tensor:
+        """
+        Preprocess input images.
+
+        Args:
+            image (Union[PIL.Image.Image, PIL.ImageFile.ImageFile]): Input image to be preprocessed.
+
+        Returns:
+            torch.Tensor: Preprocessed image as a tensor. Shape = [num_channels, image_height, image_width].
+        """
+
+        return NotImplementedError('Subclasses should implement this method')
+
+    @abstractmethod
+    def encode_text(self, text: torch.Tensor | BatchEncoding) -> torch.Tensor:
+        """
+        Encode tokenized texts into embeddings.
+
+        Args:
+            text (Union[torch.Tensor, BatchEncoding]): Tokenized text. Shape = [batch_size, max_length].
+
+        Returns:
+            Tensor: Encoded text. Shape = [batch_size, embedding_dim].
+        """
+
+        raise NotImplementedError('Subclasses should implement this method')
+
+    @abstractmethod
+    def encode_image(self, image: torch.Tensor) -> torch.Tensor:
+        """
+        Encode preprocessed images into embeddings.
+
+        Args:
+            image (torch.Tensor): Preprocessed image. Shape = [batch_size, num_channels, image_height, image_width].
+
+        Returns:
+            Tensor: Encoded image. Shape = [batch_size, embedding_dim].
+        """
+
+        raise NotImplementedError('Subclasses should implement this method')
+
+    @abstractmethod
+    def _logit_scale(self) -> torch.Tensor:
+        """
+        Return the logit scale parameter (used as the temperature τ in contrastive learning).
+
+        Returns:
+            torch.Tensor: Logit scale parameter.
+        """
+
+        return NotImplementedError('Subclasses should implement this method')
+
+    def _encode_abstract(self, abstract: torch.Tensor | BatchEncoding) -> torch.Tensor:
+        """
+        Encode abstract text using the model and processor.
+
+        Args:
+            abstract (Union[torch.Tensor, BatchEncoding]): Tokenized abstract text. Shape = [batch_size, max_length].
+
+        Returns:
+            Tensor: Encoded abstract text. Shape = [batch_size, embedding_dim].
+        """
+
+        abstract_embed = self.encode_text(abstract)
+        return abstract_embed
+
+    def _encode_GA(self, GA: torch.Tensor, caption: torch.Tensor | BatchEncoding = None) -> torch.Tensor:
+        """
+        Encode GA using the model and processor.
+
+        Args:
+            GA (torch.Tensor): Preprocessed GAs. Shape = [batch_size, num_channels, image_height, image_width].
+            caption (torch.Tensor, optional): Tokenized captions for each GA. Shape = [batch_size, max_length].
+
+        Returns:
+            Tensor: Encoded GA. Shape = [batch_size, embedding_dim].
+        """
+
+        figures_embed = self.encode_image(GA)
+        if caption is None:
+            return figures_embed
+
+        caption_batch_size = caption.shape[0] if isinstance(caption, torch.Tensor) else caption['input_ids'].shape[0]
+        if GA.shape[0] != caption_batch_size:
+            raise ValueError('Batch size of figures and captions must match.')
+
+        captions_embed = self.encode_text(caption)
+        figures_embed = figures_embed * captions_embed
+        return figures_embed
+
+    def forward(
+        self,
+        abstract: torch.Tensor,
+        GA: torch.Tensor,
+        caption: torch.Tensor = None,
+    ) -> Abs2FigRetrieverOutputForInterGARecommendation:
+        """
+        Forward pass for contrastive learning.
+
+        Args:
+            abstract (torch.Tensor): Tokenized abstracts. Shape = [batch_size, max_length].
+            GA (torch.Tensor): Preprocessed GAs. Shape = [batch_size, num_channels, image_height, image_width].
+            caption (torch.Tensor, optional): Tokenized captions for each GA. Shape = [batch_size, max_length].
+
+        Returns:
+            OutputOfAbs2FigRetrieverForInterGARecommendation: Object containing the following attributes:
+                - inter_loss (float): Inter loss.
+                - sim_abs2GA (torch.Tensor): Similarity between abstracts and GAs. Shape = [batch_size, batch_size].
+                - sim_GA2abs (torch.Tensor): Similarity between GAs and abstracts. Shape = [batch_size, batch_size].
+                - abstract_embed (torch.Tensor): Encoded abstracts. Shape = [batch_size, embedding_dim].
+                - GA_embed (torch.Tensor): Encoded GAs. Shape = [batch_size, embedding_dim].
+        """
+
+        # Encode text and images
+        abstract_embed = self._encode_abstract(abstract)
+        GA_embed = self._encode_GA(GA, caption)
+
+        # Normalize embeddings
+        normalized_abstract_embed = abstract_embed / abstract_embed.norm(dim=-1, keepdim=True)
+        normalized_GA_embed = GA_embed / GA_embed.norm(dim=-1, keepdim=True)
+
+        # Compute similarity
+        sim_abs2GA = torch.matmul(normalized_abstract_embed, normalized_GA_embed.T)
+        sim_GA2abs = torch.matmul(normalized_GA_embed, normalized_abstract_embed.T)
+
+        # Scaling
+        sim_abs2GA = self._logit_scale().exp() * sim_abs2GA
+        sim_GA2abs = self._logit_scale().exp() * sim_GA2abs
+
+        # Inter Loss
+        labels = torch.arange(GA_embed.size(0), dtype=torch.long).to(sim_abs2GA.device)
+        inter_loss = (F.cross_entropy(sim_abs2GA, labels) +
+                      F.cross_entropy(sim_GA2abs, labels)) / 2
+
+        return Abs2FigRetrieverOutputForInterGARecommendation(
+            inter_loss=inter_loss,
+            sim_abs2GA=sim_abs2GA,
+            sim_GA2abs=sim_GA2abs,
+            abstract_embed=abstract_embed,
+            GA_embed=GA_embed,
+        )
+
+
+class BaseAbs2FigRetrieverLoaderForInterGARecommendation(ABC):
+    """
+    Base class for loading abstract-to-figure retrieval models designed for Inter-GA Recommendation.
+    This class provides a common interface for initializing and loading models used in abstract-to-figure retrieval tasks.
+    Subclasses should implement the `_load()` method to support different backbone architectures (e.g., CLIP, Long-CLIP, BLIP-2).
+
+    Attributes:
+        model_type (str): A identifier to specify the backbone architecture (to be set by subclasses).
+        default_model_name (str): The default pretrained model name, HuggingFace model identifier, or path (to be set by subclasses).
+
+    Args:
+        model_name (str, optional): The model name, HuggingFace model identifier, or path to the pretrained model to load.
+
+    Example:
+        >>> class SubAbs2FigRetrieverLoader(BaseAbs2FigRetrieverForInterGARecommendationLoader):
+        ...     model_type = 'clip'
+        ...     default_model_name = 'ViT-L/14'
+        ...
+        ...     def __init__(self, model_name: str = None, **kwargs):
+        ...         super().__init__(model_name)
+        ...
+        ...     def _load(self):
+        ...         return SubAbs2FigRetriever(self.model_name)
+
+        >>> MODEL_REGISTRY = {
+        ...     model_loader.model_type: model_loader
+        ...     for model_loader in BaseAbs2FigRetrieverForInterGARecommendationLoader.__subclasses__()
+        ... }
+        >>> loader = MODEL_REGISTRY['clip']()
+        >>> model = loader.get_model()
+    """
+
+    model_type: str
+    default_model_name: str
+
+    def __init__(self, model_name: str = None) -> None:
+        self.model_name = model_name or self.default_model_name
+        self.model = self._load()
+
+    @abstractmethod
+    def _load(self) -> BaseAbs2FigRetrieverForInterGARecommendation:
+        """
+        Load the model for abstract-to-figure retrieval.
+        """
+
+        raise NotImplementedError('Subclasses should implement this method')
+
+    def get_model(self) -> BaseAbs2FigRetrieverForInterGARecommendation:
+        """
+        Get the loaded model instance.
+
+        Returns:
+            nn.Module: The loaded model instance.
+        """
+
+        return self.model
