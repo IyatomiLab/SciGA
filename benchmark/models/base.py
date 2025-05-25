@@ -8,6 +8,176 @@ from PIL import Image, ImageFile
 
 
 # ════════════════════════════════════════════════════════════
+# 📘 Intra-GA Recommendation | (ii) GA-BC
+# ════════════════════════════════════════════════════════════
+
+@dataclass
+class GAClassifierOutput():
+    """
+    This class defines the output structure for GA/non-GA binary classifier models designed for intra-GA Recommendation.
+
+    Attributes:
+        loss (torch.Tensor): Cross-entropy loss.
+        prob (torch.Tensor): Predicted probabilities for each class. Values range from 0 to 1. 0 for non-GA, 1 for GA. Shape = [batch_size, num_classes].
+        pred (torch.Tensor): Predicted binary class label. 0 for non-GA, 1 for GA. Shape = [batch_size].
+    """
+
+    loss: torch.Tensor
+    prob: torch.Tensor
+    pred: torch.Tensor
+
+
+class BaseGAClassifier(nn.Module):
+    """
+    Base class for GA/non-GA binary classification models used in Intra-GA Recommendation.
+    This class provides a unified interface for models that classify whether a figure is GA or non-GA,
+    supporting flexible integration of various image encoder backbones (e.g., ViT, EfficientNet, ConvNext).
+
+    Subclasses must implement the following methods:
+        - `get_backbone()`: Get the backbone of the model.
+        - `preprocess_image()`: Preprocess input images.
+        - `_classify_image()`: Compute logits for the input image.
+    """
+
+    def __init__(self, loss_weight: torch.Tensor = None) -> None:
+        super().__init__()
+        self.loss_weight = loss_weight
+
+    @abstractmethod
+    def get_backbone(self) -> nn.Module:
+        """
+        Get the backbone of the model.
+
+        Returns:
+            nn.Module: The backbone of the model.
+        """
+
+        return NotImplementedError('Subclasses should implement this method')
+
+    @abstractmethod
+    def preprocess_image(self, image: Image.Image | ImageFile.ImageFile) -> torch.Tensor:
+        """
+        Preprocess input images.
+
+        Args:
+            image (Union[PIL.Image.Image, PIL.ImageFile.ImageFile]): Input image to be preprocessed.
+
+        Returns:
+            torch.Tensor: Preprocessed image as a tensor. Shape = [num_channels, image_height, image_width].
+        """
+
+        return NotImplementedError('Subclasses should implement this method')
+
+    @abstractmethod
+    def _classify_image(self, image: torch.Tensor) -> torch.Tensor:
+        """
+        Compute logits for the input image.
+
+        Args:
+            image (torch.Tensor): Preprocessed image. Shape = [batch_size, num_channels, image_height, image_width].
+
+        Returns:
+            torch.Tensor: Logits. Shape = [batch_size, num_classes].
+        """
+
+        raise NotImplementedError('Subclasses should implement this method')
+
+    def forward(
+        self,
+        image: torch.Tensor,
+        label: torch.Tensor = None,
+    ) -> GAClassifierOutput:
+        """
+        Forward pass for the binary classifier.
+
+        Args:
+            image (torch.Tensor): Preprocessed image. Shape = [batch_size, num_channels, image_height, image_width].
+            label (torch.Tensor, optional): Ground truth binary label indicating whether each input image is a GA. 0 for non-GA, 1 for GA. Shape = [batch_size].
+
+        Returns:
+            GAClassifierOutput: Object containing the following attributes:
+                - 'prob' (torch.Tensor): Predicted probabilities for each class. Values range from 0 to 1. Shape = [batch_size, num_classes].
+                - 'pred' (torch.Tensor): Predicted binary class label. 0 for non-GA, 1 for GA. Shape = [batch_size].
+                - 'loss' (torch.Tensor): Cross-entropy loss.
+        """
+
+        logit = self._classify_image(image)
+
+        prob = F.softmax(logit, dim=-1)
+        pred = prob.argmax(dim=1, keepdim=True)
+        loss = F.cross_entropy(logit, label, weight=self.loss_weight.to(logit.device)) if label is not None else None
+
+        return GAClassifierOutput(
+            loss=loss,
+            prob=prob,
+            pred=pred,
+        )
+
+
+class BaseGAClassifierLoader(ABC):
+    """
+    Base class for loading GA/non-GA binary classification models.
+    This class provides a common interface for initializing and loading models used in GA binary classification tasks
+    Subclasses should implement the `_load()` method to support different backbone architectures (e.g., ViT, EfficientNet, ConvNext).
+
+    Attributes:
+        model_type (str): A identifier to specify the backbone architecture (to be set by subclasses).
+        default_model_name (str): The default pretrained model name, HuggingFace model identifier, or path (to be set by subclasses).
+
+    Args:
+        model_name (str, optional): Identifier used to load the model. Depending on the model type, this may refer to:
+            - A HuggingFace repository name (e.g., 'google/vit-large-patch16-224-in21k' for ViT)
+            - A local path to a pretrained checkpoint directory (e.g., `'./models/x2vlm_large_4m/'`)
+            - A shorthand string used by the underlying model loader (e.g., 'ViT-L/14' for CLIP via openai/clip, 'efficientnet_v2_l' for torchvision)
+        loss_weight (torch.Tensor, optional): Tensor representing class weighting for loss. Shape = [num_classes].
+
+    Example:
+        >>> class SubGAClassifierLoader(BaseGAClassifierLoader):
+        ...     model_type = 'vit'
+        ...     default_model_name = 'google/vit-large-patch16-224-in21k'
+        ...
+        ...     def __init__(self, model_name: str = None, loss_weight: torch.Tensor = None, **kwargs):
+        ...         super().__init__(model_name, loss_weight)
+        ...
+        ...     def _load(self):
+        ...         return SubGAClassifier(self.model_name)
+
+        >>> MODEL_REGISTRY = {
+        ...     model_loader.model_type: model_loader
+        ...     for model_loader in BaseGAClassifierLoader.__subclasses__()
+        ... }
+        >>> loader = MODEL_REGISTRY['vit']()
+        >>> model = loader.get_model()
+    """
+
+    model_type: str
+    default_model_name: str
+
+    def __init__(self, model_name: str = None, loss_weight: torch.Tensor = None) -> None:
+        self.model_name = model_name or self.default_model_name
+        self.loss_weight = loss_weight
+        self.model = self._load()
+
+    @abstractmethod
+    def _load(self) -> BaseGAClassifier:
+        """
+        Load the model for GA/non-GA binary classification (GA-BC)
+        """
+
+        raise NotImplementedError('Subclasses should implement this method')
+
+    def get_model(self) -> BaseGAClassifier:
+        """
+        Get the loaded model instance.
+
+        Returns:
+            nn.Module: The loaded model instance.
+        """
+
+        return self.model
+
+
+# ════════════════════════════════════════════════════════════
 # 📘 Intra-GA Recommendation | (iii - iv) Abs2Fig
 # ════════════════════════════════════════════════════════════
 

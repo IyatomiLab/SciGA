@@ -10,6 +10,89 @@ from PIL import Image, ImageFile
 
 
 # ════════════════════════════════════════════════════════════
+# 📘 Intra-GA Recommendation | (ii) GA-BC
+# ════════════════════════════════════════════════════════════
+
+class GABinaryClassifierDataset(Dataset):
+    def __init__(
+        self,
+        paper_id: list[str],
+        research_fields: list[str],
+        image_path: list[str],
+        label: list[int],
+        transform: Callable[[Image.Image], torch.Tensor],
+        GT_figure_ids: list[str],
+    ) -> None:
+        self.paper_id = paper_id
+        self.research_fields = research_fields
+        self.figure_path = image_path
+        self.label = label
+        self.transform = transform
+        self.GT_figure_ids = GT_figure_ids
+
+        self.collate_fn = GA_binary_classifier_collate
+
+        Image.MAX_IMAGE_PIXELS = None
+        ImageFile.LOAD_TRUNCATED_IMAGES = True
+
+    def __len__(self) -> int:
+        return len(self.paper_id)
+
+    def __getitem__(self, idx) -> tuple[str, list[str], str, list[str], torch.Tensor, int]:
+        paper_id = self.paper_id[idx]
+        research_fields = self.research_fields[idx]
+        figure_path = self.figure_path[idx]
+        label = self.label[idx]
+        GT_figure_ids = self.GT_figure_ids[idx]
+
+        # Preprocess image
+        figure = self.transform(Image.open(figure_path).convert('RGB'))
+
+        # Extract figure IDs
+        figure_id = 'GA' if label == 1 else re.match(r'.*_(F\d+)(?:\.\d+|\(\d+\))?.*', figure_path).group(1)
+
+        return paper_id, research_fields, figure_id, GT_figure_ids, figure, label
+
+
+def GA_binary_classifier_collate(batch: list[tuple]) -> tuple:
+    """
+    Collate function for GA Binary Classifier.
+    The default PyTorch collate function `default_collate()` fails when each sample contains fields like list[str].
+    This function selectively applies `default_collate()` only to tensor-compatible fields, while preserving non-tensor fields in their original structure.
+
+    Args:
+        batch (List[Tuple]): A list of dataset samples, where each sample is a tuple of multiple fields.
+
+    Returns:
+        Tuple: Batched data in the same field order as the dataset output.
+    """
+
+    (
+        batch_paper_id,
+        batch_research_fields,
+        batch_figure_id,
+        batch_GT_figure_ids,
+        batch_figure,
+        batch_label,
+    ) = zip(*batch)
+
+    batch_paper_id, batch_figure_id, batch_figure, batch_label = default_collate([
+        (paper_id, figure_id, figure, label)
+        for paper_id, figure_id, figure, label
+        in zip(batch_paper_id, batch_figure_id, batch_figure, batch_label)
+    ])
+
+    return (
+        batch_paper_id,
+        batch_research_fields,
+        batch_figure_id,
+        batch_GT_figure_ids,
+        batch_figure,
+        batch_label,
+    )
+
+
+# ════════════════════════════════════════════════════════════
 # 📘 Intra-GA Recommendation | (iii - iv) Abs2Fig
 # ════════════════════════════════════════════════════════════
 
