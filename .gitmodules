@@ -1,0 +1,9 @@
+[submodule "benchmark/submodules/longclip"]
+	path = benchmark/submodules/longclip
+	url = git@github.com:beichenzbc/Long-CLIP.git
+[submodule "benchmark/submodules/x2vlm"]
+	path = benchmark/submodules/x2vlm
+	url = git@github.com:zengyan-97/X2-VLM.git
+[submodule "benchmark/submodules/bert-large-uncased"]
+	path = benchmark/submodules/bert-large-uncased
+	url = git@hf.co:google-bert/bert-large-uncased
