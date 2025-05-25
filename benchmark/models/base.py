@@ -8,6 +8,104 @@ from PIL import Image, ImageFile
 
 
 # ════════════════════════════════════════════════════════════
+# 📘 Intra-GA / 📙 Inter-GA Recommendation | (i) Abs2Cap
+# ════════════════════════════════════════════════════════════
+
+@dataclass
+class Abs2CapMatcherOutput():
+    """
+    This class defines the output structure for abstract-to-caption matchers.
+
+    Attributes:
+        sim_abs2cap (List[float]): Similarity scores between abstract and captions. Shape = [m].
+    """
+
+    sim_abs2cap: list[float]
+
+
+class BaseAbs2CapMatcher(ABC):
+    """
+    Base class for abstract-to-caption matchers.
+    This class provides a unified interface for models that compute similarity scores between abstracts and captions,
+    supporting flexible integration of various lexical overlap metrics (e.g., ROUGE, BM25, BERTScore).
+
+    Subclasses must implement the following methods:
+        - `_get_score()`: Compute similarity score between abstract and caption.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    @abstractmethod
+    def match(self, abstract: str, captions: list[str]) -> Abs2CapMatcherOutput:
+        """
+        Compute similarity scores between an abstract and a list of captions.
+
+        Args:
+            abstract (str): Abstract string.
+            captions (List[str]): A List of caption strings.
+
+        Returns:
+            Abs2CapMatcherOutput: Object containing the following attributes:
+                - sim_abs2cap (List[float]): Similarity scores between abstract and captions. Shape = [m].
+        """
+
+        raise NotImplementedError('Subclasses should implement this method')
+
+
+class BaseAbs2CapMatcherLoader(ABC):
+    """
+    Base class for loading Abstract-to-Caption matching models.
+    This class provides a common interface for initializing and loading models used in abstract-to-caption matching tasks.
+    Subclasses should implement the `_load()` method to support different lexical overlap metrics (e.g., ROUGE-L, BM25, BERTScore).
+
+    Attributes:
+        model_type (str): A identifier to specify the lexical overlap metric (to be set by subclasses).
+
+    Example:
+        >>> class SubAbs2CapMatcherLoader(BaseAbs2CapMatcherLoader):
+        ...     model_type = 'ROUGE'
+        ...
+        ...     def __init__(self, **kwargs):
+        ...         super().__init__()
+        ...
+        ...     def _load(self):
+        ...         return SubAbs2CapMatcher()
+
+        >>> MODEL_REGISTRY = {
+        ...     model_loader.model_type: model_loader
+        ...     for model_loader in BaseAbs2CapMatcherLoader.__subclasses__()
+        ... }
+        >>> loader = MODEL_REGISTRY['ROUGE']()
+        >>> model = loader.get_model()
+    """
+
+    model_type: str
+    default_model_name: str
+
+    def __init__(self) -> None:
+        self.model = self._load()
+
+    @abstractmethod
+    def _load(self) -> BaseAbs2CapMatcher:
+        """
+        Load the model for GA/non-GA binary classification (GA-BC)
+        """
+
+        raise NotImplementedError('Subclasses should implement this method')
+
+    def get_model(self) -> BaseAbs2CapMatcher:
+        """
+        Get the loaded model instance.
+
+        Returns:
+            nn.Module: The loaded model instance.
+        """
+
+        return self.model
+
+
+# ════════════════════════════════════════════════════════════
 # 📘 Intra-GA Recommendation | (ii) GA-BC
 # ════════════════════════════════════════════════════════════
 
