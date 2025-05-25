@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "car"
+version = "0.1.0"
+description = "Confidence-Adjusted Top-1 GT Ratio"
+authors = ["Takuro Kawada <takuro.kawada@gmail.com>"]
+readme = "README.md"
+packages = [{ include = "car" }]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<4.0"
+torch = "^2.3.1"
+
+[build-system]
+requires = ["poetry-core>=1.5.0"]
+build-backend = "poetry.core.masonry.api"
