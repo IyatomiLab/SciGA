@@ -14,7 +14,7 @@ import wandb
 class Args(Tap):
     experiment_name: str = 'SciGA_intraGA_Abs2Cap'
     seed: int = 42
-    dataset_json_dir: str = './benchmark/SciGA_for_experiments/'
+    dataset_json_dir: str = './SciGA_for_experiments/json/'
 
     model_type: str = 'ROUGE'
 

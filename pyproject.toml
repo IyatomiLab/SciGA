@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "sciga"
+version = "0.1.0"
+description = "SciGA benchmark and crawler environment"
+authors = ["Takuro KAWADA <takuro.kawada@gmail.com>"]
+readme = "README.md"
+packages = [
+    { include = "benchmark" },
+    { include = "crawler" }
+]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<4.0"
+
+# Crawler dependencies
+
+# Benchmark dependencies
+torch = "^2.3.1"
+torchvision = "^0.18.1"
+pillow = "^10.4.0"
+pandas = "^2.2.2"
+transformers = "^4.45.2"
+clip = {git = "https://github.com/openai/CLIP.git"}
+open-clip-torch = "^2.30.0"
+dreamsim = "^0.2.1"
+nltk = "^3.9.1"
+rouge-score = "^0.1.2"
+bert-score = "^0.3.13"
+bm25s = "^0.2.12"
+pystemmer = "^3.0.0"
+evaluate = "^0.4.3"
+pycocoevalcap = "^1.2"
+typed-argument-parser = "^1.10.1"
+tqdm = "^4.66.4"
+tabulate = "^0.9.0"
+wandb = "^0.18.2"
+
+## X2-VLM dependencies
+einops = "^0.8.1"
+ruamel-yaml = "^0.18.10"
+scikit-image = "^0.25.2"
+opencv-python = "^4.11.0.86"
+
+# import CAR from local path
+car = { path = "./car", develop = true }
+
+[build-system]
+requires = ["poetry-core>=1.5.0"]
+build-backend = "poetry.core.masonry.api"

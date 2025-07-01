@@ -15,8 +15,8 @@ class Args(Tap):
     experiment_name: str = 'SciGA_interGA_Abs2Cap'
     seed: int = 42
     device: int = 0
-    dataset_json_dir: str = './benchmark/SciGA_for_experiments/'
-    dataset_figure_dir: str = './SciGA/'
+    dataset_json_dir: str = './SciGA_for_experiments/json/'
+    dataset_figure_dir: str = './SciGA_for_experiments/figures/'
     save_cache_dir: str = './benchmark/output/caches/'
 
     model_type: str = 'ROUGE'
