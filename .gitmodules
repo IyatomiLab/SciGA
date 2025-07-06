@@ -10,3 +10,6 @@
 [submodule "benchmark/output/checkpoints"]
 	path = benchmark/output/checkpoints
 	url = https://huggingface.co/iyatomilab/SciGA-GARecModel
+[submodule "SciGA-for-experiments"]
+	path = SciGA-for-experiments
+	url = https://huggingface.co/datasets/iyatomilab/SciGA-for-experiments
