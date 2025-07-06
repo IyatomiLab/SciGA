@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="SciGA-145k is a large-scale dataset for designing and recommending graphical abstracts in scientific papers.">
+    <meta property="og:title" content="SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers"/>
+    <meta property="og:description" content="A large-scale dataset (145k papers, 1.1M figures) for GA recommendation and generation.">
+    <meta property="og:url" content="https://iyatomilab.github.io/SciGA/">
+    <meta property="og:image" content="https://iyatomilab.github.io/SciGA/static/images/teaser.png">
+
+    <meta name="twitter:title" content="SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers">
+    <meta name="twitter:description" content="SciGA-145k: 145k papers and 1.1M figures for GA recommendation and design.">
+    <meta name="twitter:image" content="https://iyatomilab.github.io/SciGA/static/images/teaser.png">
+
+    <meta name="keywords" content="Graphical Abstract, AI for Science, Paper Dataset">
+
+    <title>SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐐</text></svg>">
+    <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+    rel="stylesheet">
+
+    <link rel="stylesheet" href="static/css/bulma.min.css">
+    <link rel="stylesheet" href="static/css/bulma-carousel.min.css">
+    <link rel="stylesheet" href="static/css/bulma-slider.min.css">
+    <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
+    <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <link rel="stylesheet" href="static/css/index.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://documentcloud.adobe.com/view-sdk/main.js"></script>
+    <script defer src="static/js/fontawesome.all.min.js"></script>
+    <script src="static/js/bulma-carousel.min.js"></script>
+    <script src="static/js/bulma-slider.min.js"></script>
+    <script src="static/js/index.js"></script>
+</head>
+
+<body>
+<section class="hero">
+    <div class="hero-body">
+        <div class="container is-max-desktop">
+            <div class="columns is-centered">
+                <div class="column has-text-centered">
+
+                    <h1 class="title is-2 publication-title">SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers</h1>
+
+                    <div class="is-size-5 publication-authors">
+                        <!-- Paper authors -->
+                        <span class="author-block">
+                            <u>Takuro Kawada</u>,
+                        </span>
+                        <span class="author-block">
+                            <a href="https://shunk031.me/" target="_blank">Shunsuke Kitada</a>,
+                        </span>
+                        <span class="author-block">
+                            Sota Nemoto,
+                        </span>
+                        <span class="author-block">
+                            <a href="https://iyatomi-lab.info/english-top" target="_blank">Hitoshi Iyatomi</a>
+                        </span>
+                    </div>
+
+                    <div class="is-size-5 publication-authors">
+                        <span class="author-block"> Hosei University, Tokyo, Japan </span>
+                    </div>
+
+                    <div class="column has-text-centered">
+                        <div class="publication-links">
+                            <!-- ArXiv Link -->
+                            <span class="link-block">
+                                <a href="https://arxiv.org/abs/2507.02212" target="_blank"
+                                    class="external-link button is-normal is-rounded is-dark">
+                                    <span class="icon">
+                                        <i class="ai ai-arxiv"></i>
+                                    </span>
+                                    <span>arXiv</span>
+                                </a>
+                            </span>
+
+                            <!-- Huggingface Link -->
+                            <span class="link-block">
+                                <a href="https://huggingface.co/datasets/iyatomilab/SciGA" target="_blank"
+                                    class="external-link button is-normal is-rounded is-dark">
+                                    <span class="icon">
+                                        <i class="fa fa-database"></i>
+                                    </span>
+                                    <span>Dataset</span>
+                                </a>
+                            </span>
+
+                            <!-- Github Link -->
+                            <span class="link-block">
+                                <a href="https://github.com/IyatomiLab/SciGA" target="_blank"
+                                    class="external-link button is-normal is-rounded is-dark">
+                                    <span class="icon">
+                                        <i class="fab fa-github"></i>
+                                    </span>
+                                    <span>Code</span>
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Abstract -->
+<section class="section hero is-light">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Graphical Abstracts (GAs) play a crucial role in visually conveying the key findings of scientific papers.
+            While recent research has increasingly incorporated visual materials such as Figure 1 as de facto GAs, their potential to enhance scientific communication remains largely unexplored.
+            Moreover, designing effective GAs requires advanced visualization skills, creating a barrier to their widespread adoption.
+            To tackle these challenges, we introduce SciGA-145k, a large-scale dataset comprising approximately 145,000 scientific papers and 1.14 million figures, explicitly designed for supporting GA selection and recommendation as well as facilitating research in automated GA generation.
+            As a preliminary step toward GA design support, we define two tasks: 1) Intra-GA recommendation, which identifies figures within a given paper that are well-suited to serve as GAs, and 2) Inter-GA recommendation, which retrieves GAs from other papers to inspire the creation of new GAs.
+            We provide reasonable baseline models for these tasks.
+            Furthermore, we propose Confidence Adjusted top-1 ground truth Ratio (CAR), a novel recommendation metric that offers a fine-grained analysis of model behavior.
+            CAR addresses limitations in traditional ranking-based metrics by considering cases where multiple figures within a paper, beyond the explicitly labeled GA, may also serve as GAs.
+            By unifying these tasks and metrics, our SciGA-145k establishes a foundation for advancing visual scientific communication while contributing to the development of AI for Science.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- End Abstract -->
+
+<!-- GA Sample -->
+<section class="hero is-small">
+    <div class="hero-body">
+        <div class="container">
+            <h2 class="title is-3 is-centered has-text-centered">🐐 SciGA Dataset: Sample GAs</h2>
+            <div id="results-carousel" class="carousel results-carousel">
+                
+                <div class="item">
+                    <h2 class="subtitle">
+                        <a href="https://doi.org/10.48550/arXiv.2401.09716" target="_blank">arXiv:2401.09716 - HCVP: Leveraging Hierarchical Contrastive Visual Prompt for Domain Generalization</a>
+                    </h2>
+                    <div class="media-box">
+                        <img src="static/images/2401.09716.png" alt="arXiv:2401.09716"/>
+                    </div>
+                </div>
+
+                <div class="item">
+                    <h2 class="subtitle">
+                        <a href="https://doi.org/10.48550/arXiv.2401.17856" target="_blank">arXiv:2401.17856 - Beyond Numbers: Creating Analogies to Enhance Data Comprehension and Communication with Generative AI</a>
+                    </h2>
+                    <div class="media-box">
+                        <img src="static/images/2401.17856.png" alt="arXiv:2401.17856"/>
+                    </div>
+                </div>
+
+                <div class="item">
+                    <h2 class="subtitle">
+                        <a href="https://doi.org/10.48550/arXiv.2402.08939" target="_blank">arXiv:2402.08939 - Premise Order Matters in Reasoning with Large Language Models</a>
+                    </h2>
+                    <div class="media-box">
+                        <img src="static/images/2402.08939.png" alt="arXiv:2402.08939"/>
+                    </div>
+                </div>
+
+                <div class="item">
+                    <h2 class="subtitle">
+                        <a href="https://doi.org/10.48550/arXiv.2403.10179" target="_blank">arXiv:2403.10179 - Animate Your Motion: Turning Still Images into Dynamic Videos</a>
+                    </h2>
+                    <div class="media-box">
+                        <img src="static/images/2403.10179.png" alt="arXiv:2403.10179"/>
+                    </div>
+                </div>
+
+                <div class="item">
+                    <h2 class="subtitle">
+                        <a href="https://doi.org/10.48550/arXiv.2403.11027" target="_blank">arXiv:2403.11027 - Reward Guided Latent Consistency Distillation</a>
+                    </h2>
+                    <div class="media-box">
+                        <img src="static/images/2403.11027.png" alt="arXiv:2403.11027"/>
+                    </div>
+                </div>
+
+                <div class="item">
+                    <h2 class="subtitle">
+                        <a href="https://doi.org/10.48550/arXiv.2207.07358" target="_blank">arXiv:2207.07358 - Parallel measurements of vibrational modes in a few-layer graphene nanomechanical resonator using software-defined radio dongles</a>
+                    </h2>
+                    <div class="media-box">
+                        <video autoplay controls muted loop>
+                        <source src="static/videos/2207.07358.mp4" type="video/mp4">
+                        </video>
+                    </div>
+                </div>
+            </div>
+            <div class="container is-max-desktop">
+                <div class="columns is-centered">
+                    <div class="column is-four-fifths">
+                        <div class="content has-text-justified">
+                            <p>
+                                Example GAs and their annotations in our SciGA-145k.
+                                Our dataset includes three types of GAs: Original (newly created), Reused (directly copied from paper figures), and Modified (combining/altering existing figures).
+                                The SciGA-145k uniquely offers full-text content with comprehensive figure support and explicit GA/teaser annotations, featuring elements designed to facilitate GA creation, recommendation, and future automated generation.
+                            </p>
+                            <list>
+                                <li>145k scientific papers (from arXiv)</li>
+                                <li>1.1M figures (.png, .mp4)</li>
+                                <li>150+ GAs — author-provided visual summaries, annotated with type</li>
+                                <li>30,000+ teasers — first-page figures that serve as de facto GAs</li>
+                                <li>150+ figure captions — author-provided figure descriptions, annotated with type</li>
+                                <li>Structured metadata (sections, figures, DOIs, subjects, etc.)</li>
+                                <li>Annotated GA types: Original, Reused, Modified</li>
+                            </list>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End GA Sample -->
+
+
+<section class="section hero is-light">
+    <div class="container is-max-desktop">
+        <h2 class="title is-3 is-centered has-text-centered">🔍 GA Recommendation Tasks</h2>
+        <div class="columns is-centered">
+            <div class="column is-four-fifths">
+                <div class="content has-text-justified">
+                    <p>
+                        To support the design of GAs, we define two recommendation tasks in SciGA-145k:
+                    </p>
+                    <ul>
+                        <li><b>Intra-GA Recommendation:</b> Identify the most suitable figure within a given paper to serve as a GA. This task enables automatic GA suggestion for research sharing platforms.</li>
+                        <li><b>Inter-GA Recommendation:</b> Retrieve GAs from other papers to inspire the creation of a new GA for a given abstract. This encourages reuse of effective design patterns.</li>
+                    </ul>
+                    <p>
+                        We benchmark several methods — including caption-aware retrieval using CLIP and Long-CLIP — showing that incorporating figure captions alongside visual features significantly boosts accuracy and consistency.
+                    </p>
+                    <p>
+                        These tasks provide a foundation for developing tools that automate or assist GA creation, promoting broader adoption and better visual communication in academic publishing.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<!-- CAR -->
+<section class="section hero is-light">
+    <div class="container is-max-desktop">
+        <h2 class="title is-3 is-centered has-text-centered">
+            📐 Confidence-aware Metric for Recommendation Tasks: CAR
+        </h2>
+        <img src="static/images/car.png" alt="CAR score example"/>
+        <div class="columns is-centered">
+            <div class="column is-four-fifths">
+                <div class="content has-text-justified">
+                    <p>
+                        Examples of Intra-GA Recommendation results demonstrating the intuition behind CAR@k scores.
+                        The yellow-highlighted figures represent GTs.
+                        Left: High CAR@k indicates the model confidently recommends the correct GA.
+                        Center: Medium CAR@k represents cases where multiple candidates are similarly plausible, resulting in lower confidence.
+                        Right: Low CAR@k reflects high model confidence but incorrect recommendations, highlighting mismatches between the model’s confidence and actual relevance.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End CAR -->
+
+
+
+
+
+
+
+<!--BibTex citation -->
+<section class="section" id="BibTeX">
+<div class="container is-max-desktop content">
+<h2 class="title is-3 is-centered has-text-centered">BibTeX</h2>
+<pre>
+<code>
+@article{kawada2025sciga,
+    title={SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers},
+    author={Takuro Kawada and Shunsuke Kitada and Sota Nemoto and Hitoshi Iyatomi},
+    journal={arXiv preprint arXiv:2507.02212},
+    year={2025}
+}
+</code>
+</pre>
+</div>
+</section>
+<!--End BibTex citation -->
+
+<footer class="footer">
+    <div class="container">
+        <div class="columns is-centered">
+            <div class="column is-8">
+                <div class="content">
+                    <p>
+                        This page was built using the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project Page Template</a> which was adopted from the <a href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
+                        You are free to borrow the source code of this website, we just ask that you link back to this page in the footer. <br> This website is licensed under a <a rel="license"  href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative
+                        Commons Attribution-ShareAlike 4.0 International License</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
