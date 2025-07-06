@@ -7,3 +7,6 @@
 [submodule "benchmark/submodules/bert-large-uncased"]
 	path = benchmark/submodules/bert-large-uncased
 	url = git@hf.co:google-bert/bert-large-uncased
+[submodule "benchmark/output/checkpoints"]
+	path = benchmark/output/checkpoints
+	url = https://huggingface.co/iyatomilab/SciGA-GARecModel
