@@ -1,111 +1,304 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <meta charset="utf-8">
-    <meta name="description" content="SciGA-145k is a large-scale dataset for designing and recommending graphical abstracts in scientific papers.">
-    <meta property="og:title" content="SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers"/>
-    <meta property="og:description" content="A large-scale dataset (145k papers, 1.1M figures) for GA recommendation and generation.">
-    <meta property="og:url" content="https://iyatomilab.github.io/SciGA/">
-    <meta property="og:image" content="https://iyatomilab.github.io/SciGA/static/images/teaser.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <meta name="twitter:title" content="SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers">
-    <meta name="twitter:description" content="SciGA-145k: 145k papers and 1.1M figures for GA recommendation and design.">
-    <meta name="twitter:image" content="https://iyatomilab.github.io/SciGA/static/images/teaser.png">
+  <!-- Primary Meta Tags -->
+  <!-- TODO: Replace with your paper title and author names -->
+  <meta name="title" content="🐐 SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers - Kawada et al.">
+  <!-- TODO: Write a compelling 150-160 character description of your research -->
+  <meta name="description"
+    content="SciGA-145k is a large-scale dataset for designing and recommending graphical abstracts in scientific papers.">
+  <!-- TODO: Add 5-10 relevant keywords for your research area -->
+  <meta name="keywords"
+    content="Graphical Abstracts, AI for Science, Paper Dataset, Evaluation Metrics, Machine Learning, Vision and Language, Artificial Intelligence">
+  <!-- TODO: List all authors -->
+  <meta name="author" content="Kawada et al.">
+  <meta name="robots" content="index, follow">
+  <meta name="language" content="English">
 
-    <meta name="keywords" content="Graphical Abstract, AI for Science, Paper Dataset">
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Iyatomi Lab, Hosei University">
+  <meta property="og:title" content="SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers - Kawada et al.">
+  <meta property="og:description" content="SciGA-145k is a large-scale dataset for designing and recommending graphical abstracts in scientific papers.">
+  <meta property="og:url" content="https://iyatomilab.github.io/SciGA">
+  <meta property="og:image" content="https://iyatomilab.github.io/SciGA/static/images/teaser.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers - Kawada et al. - Research Preview">
+  <meta property="article:published_time" content="2026-01-01T00:00:00.000Z">
+  <meta property="article:author" content="Kawada et al.">
+  <meta property="article:section" content="Research">
+  <meta property="article:tag" content="SciGA">
 
-    <title>SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐐</text></svg>">
-    <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
-    rel="stylesheet">
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers - Kawada et al.">
+  <meta name="twitter:description" content="SciGA-145k is a large-scale dataset for designing and recommending graphical abstracts in scientific papers.">
+  <meta name="twitter:image" content="https://iyatomilab.github.io/SciGA/static/images/teaser.png">
+  <meta name="twitter:image:alt" content="SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers - Kawada et al. - Research Preview">
 
-    <link rel="stylesheet" href="static/css/bulma.min.css">
+  <!-- Academic/Research Specific -->
+  <meta name="citation_title" content="SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers - Kawada et al.">
+  <meta name="citation_author" content="Kawada, Takuro">
+  <meta name="citation_author" content="Kitada, Shunsuke">
+  <meta name="citation_author" content="Nemoto, Sota">
+  <meta name="citation_author" content="Iyatomi, Hitoshi">
+  <meta name="citation_publication_date" content="2026">
+  <meta name="citation_conference_title" content="CVPR Findings 2026">
+  <meta name="citation_pdf_url" content="https://arxiv.org/pdf/2507.02212">
+
+  <!-- Additional SEO -->
+  <meta name="theme-color" content="#2563eb">
+  <meta name="msapplication-TileColor" content="#2563eb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://ajax.googleapis.com">
+  <link rel="preconnect" href="https://documentcloud.adobe.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+
+  <!-- TODO: Replace with your paper title and authors -->
+  <title>SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers - Kawada et al.</title>
+
+  <!-- Favicon and App Icons -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐐</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐐</text></svg>">
+    
+  <!-- Critical CSS - Load synchronously -->
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
+
+  <!-- Non-critical CSS - Load asynchronously -->
+  <link rel="preload" href="static/css/bulma-carousel.min.css" as="style"
+    onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="static/css/bulma-slider.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="static/css/fontawesome.all.min.css" as="style"
+    onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css" as="style"
+    onload="this.onload=null;this.rel='stylesheet'">
+
+  <!-- Fallback for browsers that don't support preload -->
+  <noscript>
     <link rel="stylesheet" href="static/css/bulma-carousel.min.css">
     <link rel="stylesheet" href="static/css/bulma-slider.min.css">
     <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
-    <link rel="stylesheet"
-    href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-    <link rel="stylesheet" href="static/css/index.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  </noscript>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://documentcloud.adobe.com/view-sdk/main.js"></script>
-    <script defer src="static/js/fontawesome.all.min.js"></script>
-    <script src="static/js/bulma-carousel.min.js"></script>
-    <script src="static/js/bulma-slider.min.js"></script>
-    <script src="static/js/index.js"></script>
+  <!-- Fonts - Optimized loading -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Defer non-critical JavaScript -->
+  <script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="https://documentcloud.adobe.com/view-sdk/main.js"></script>
+  <script defer src="static/js/fontawesome.all.min.js"></script>
+  <script defer src="static/js/bulma-carousel.min.js"></script>
+  <script defer src="static/js/bulma-slider.min.js"></script>
+  <script defer src="static/js/index.js"></script>
+
+  <!-- Structured Data for Academic Papers -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ScholarlyArticle",
+    "headline": "SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers",
+    "description": "SciGA-145k is a large-scale dataset for designing and recommending graphical abstracts in scientific papers.",
+    "author": [
+      {
+        "@type": "Person",
+        "name": "Kawada, Takuro",
+        "affiliation": {
+          "@type": "Organization",
+          "name": "Hosei University"
+        }
+      },
+      {
+        "@type": "Person",
+        "name": "Kitada, Shunsuke",
+        "affiliation": {
+          "@type": "Organization",
+          "name": "Hosei University"
+        }
+      },
+      {
+        "@type": "Person",
+        "name": "Nemoto, Sota",
+        "affiliation": {
+          "@type": "Organization",
+          "name": "Hosei University"
+        }
+      },
+      {
+        "@type": "Person",
+        "name": "Iyatomi, Hitoshi",
+        "affiliation": {
+          "@type": "Organization",
+          "name": "Hosei University"
+        }
+      }
+    ],
+    "datePublished": "2026-01-01",
+    "publisher": {
+      "@type": "Organization",
+      "name": "the 2026 IEEE/CVF Conference on Computer Vision and Pattern Recognition - FINDINGS Track (CVPRF)"
+    },
+    "url": "https://iyatomilab.github.io/SciGA",
+    "image": "https://iyatomilab.github.io/SciGA/static/images/teaser.png",
+    "keywords": ["Graphical Abstracts", "AI for Science", "Paper Dataset", "Evaluation Metrics", "Machine Learning", "Vision and Language", "Artificial Intelligence"],
+    "abstract": "Graphical Abstracts (GAs) play a crucial role in visually conveying the key findings of scientific papers. Although recent research increasingly incorporates visual materials such as Figure 1 as de facto GAs, their potential to enhance scientific communication remains largely unexplored. Designing effective GAs requires advanced visualization skills, hindering their widespread adoption. To tackle these challenges, we introduce SciGA-145k, a large-scale dataset comprising approximately 145,000 scientific papers and 1.14 million figures, specifically designed to support GA selection and recommendation, and to facilitate research in automated GA generation. As a preliminary step toward GA design support, we define two tasks: 1) Intra-GA Recommendation, identifying figures within a given paper well-suited as GAs, and 2) Inter-GA Recommendation, retrieving GAs from other papers to inspire new GA designs. Furthermore, we propose Confidence Adjusted top-1 ground truth Ratio (CAR), a novel recommendation metric for fine-grained analysis of model behavior. CAR addresses limitations of traditional rank-based metrics by considering that not only an explicitly labeled GA but also other in-paper figures may plausibly serve as GAs. Benchmark results demonstrate the viability of our tasks and the effectiveness of CAR. Collectively, these establish a foundation for advancing scientific communication within AI for Science.",
+    "citation": "@inproceedings{kawada2026sciga, title={SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers}, author={Kawada, Takuro and Kitada, Shunsuke and Nemoto, Sota and Iyatomi, Hitoshi}, booktitle={the 2026 IEEE/CVF Conference on Computer Vision and Pattern Recognition - FINDINGS Track (CVPRF)}, year={2026}}",
+    "isAccessibleForFree": true,
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "mainEntity": {
+      "@type": "WebPage",
+      "@id": "https://iyatomilab.github.io/SciGA"
+    },
+    "about": [
+      {
+        "@type": "Thing",
+        "name": "Graphical Abstracts"
+      },
+      {
+        "@type": "Thing", 
+        "name": "AI for Science"
+      },
+      {
+        "@type": "Thing", 
+        "name": "Paper Dataset"
+      },
+      {
+        "@type": "Thing", 
+        "name": "Evaluation Metrics"
+      },
+      {
+        "@type": "Thing", 
+        "name": "Vision and Language"
+      },
+      {
+        "@type": "Thing", 
+        "name": "Artificial Intelligence"
+      }
+    ]
+  }
+  </script>
+
+  <!-- Website/Organization Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Iyatomi Lab, Hosei University",
+    "url": "https://iyatomi-lab.info/english-top",
+    "logo": "https://iyatomilab.github.io/SciGA/static/images/favicon.ico",
+    "sameAs": [
+      "https://github.com/IyatomiLab"
+    ]
+  }
+  </script>
 </head>
 
 <body>
+
+<!-- Main Content -->
+<main id="main-content">
 <section class="hero">
-    <div class="hero-body">
-        <div class="container is-max-desktop">
-            <div class="columns is-centered">
-                <div class="column has-text-centered">
-
-                    <h1 class="title is-2 publication-title">SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers</h1>
-
-                    <div class="is-size-5 publication-authors">
-                        <!-- Paper authors -->
-                        <span class="author-block">
-                            <u>Takuro Kawada</u>,
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <!-- Title -->
+          <h1 class="title is-1 publication-title">SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers</h1>
+          
+          <!-- Authors -->
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+                <a href="https://lychee1223.github.io/" target="_blank">Takuro Kawada</a>,                            
+                </span>
+            <span class="author-block">
+                <a href="https://shunk031.me/" target="_blank">Shunsuke Kitada</a>,
+            </span>
+            <span class="author-block">
+                <a href="https://scholar.google.com/citations?user=AigBC8AAAAAJ" target="_blank">Sota Nemoto</a>,
+            </span>
+            <span class="author-block">
+                <a href="https://iyatomi-lab.info/english-top" target="_blank">Hitoshi Iyatomi</a>
+            </span>
+          </div>
+          
+          <!-- Institution and Conference/Journal Info -->
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Hosei University, Tokyo, Japan<br>
+              <strong>🎉 <i>CVPR Findings 2026</i></strong>
+            </span>
+          </div>
+          
+          <!-- Publication Links -->
+          <div class="column has-text-centered">
+            <div class="publication-links">
+                <!-- ArXiv Link -->
+                <span class="link-block">
+                    <a href="https://arxiv.org/abs/2507.02212" target="_blank"
+                        class="external-link button is-normal is-rounded is-dark">
+                        <span class="icon">
+                            <i class="ai ai-arxiv"></i>
                         </span>
-                        <span class="author-block">
-                            <a href="https://shunk031.me/" target="_blank">Shunsuke Kitada</a>,
+                        <span>arXiv</span>
+                    </a>
+                </span>
+
+                <!-- Huggingface Link -->
+                <span class="link-block">
+                    <a href="https://huggingface.co/datasets/iyatomilab/SciGA" target="_blank"
+                        class="external-link button is-normal is-rounded is-dark">
+                        <span class="icon">
+                            <i class="fa fa-database"></i>
                         </span>
-                        <span class="author-block">
-                            Sota Nemoto,
+                        <span>Dataset</span>
+                    </a>
+                </span>
+
+                <!-- Github Link -->
+                <span class="link-block">
+                    <a href="https://github.com/IyatomiLab/SciGA" target="_blank"
+                        class="external-link button is-normal is-rounded is-dark">
+                        <span class="icon">
+                            <i class="fab fa-github"></i>
                         </span>
-                        <span class="author-block">
-                            <a href="https://iyatomi-lab.info/english-top" target="_blank">Hitoshi Iyatomi</a>
-                        </span>
-                    </div>
-
-                    <div class="is-size-5 publication-authors">
-                        <span class="author-block"> Hosei University, Tokyo, Japan </span>
-                    </div>
-
-                    <div class="column has-text-centered">
-                        <div class="publication-links">
-                            <!-- ArXiv Link -->
-                            <span class="link-block">
-                                <a href="https://arxiv.org/abs/2507.02212" target="_blank"
-                                    class="external-link button is-normal is-rounded is-dark">
-                                    <span class="icon">
-                                        <i class="ai ai-arxiv"></i>
-                                    </span>
-                                    <span>arXiv</span>
-                                </a>
-                            </span>
-
-                            <!-- Huggingface Link -->
-                            <span class="link-block">
-                                <a href="https://huggingface.co/datasets/iyatomilab/SciGA" target="_blank"
-                                    class="external-link button is-normal is-rounded is-dark">
-                                    <span class="icon">
-                                        <i class="fa fa-database"></i>
-                                    </span>
-                                    <span>Dataset</span>
-                                </a>
-                            </span>
-
-                            <!-- Github Link -->
-                            <span class="link-block">
-                                <a href="https://github.com/IyatomiLab/SciGA" target="_blank"
-                                    class="external-link button is-normal is-rounded is-dark">
-                                    <span class="icon">
-                                        <i class="fab fa-github"></i>
-                                    </span>
-                                    <span>Code</span>
-                                </a>
-                            </span>
-                        </div>
-                    </div>
-
-                </div>
+                        <span>Code</span>
+                    </a>
+                </span>
             </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </section>
+
+
+
+<!-- Teaser -->
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <img src="static/images/teaser.png" alt="Graphical Abstract"/>
+      <h2 class="subtitle has-text-centered">
+        <strong>SciGA-145k</strong> is a large-scale dataset for designing and recommending graphical abstracts in scientific papers.
+      </h2>
+    </div>
+  </div>
+</section>
+<!-- End teaser -->
+
+
 
 <!-- Abstract -->
 <section class="section hero is-light">
@@ -131,6 +324,8 @@
   </div>
 </section>
 <!-- End Abstract -->
+
+
 
 <!-- GA Sample -->
 <section class="hero is-small">
@@ -210,7 +405,7 @@
                                 <li>150+ GAs — author-provided visual summaries, annotated with type</li>
                                 <li>30,000+ teasers — first-page figures that serve as de facto GAs</li>
                                 <li>150+ figure captions — author-provided figure descriptions, annotated with type</li>
-                                <li>Structured metadata (sections, figures, DOIs, subjects, etc.)</li>
+                                <li>Structured metadata (sections, figures, DOIs, research fields, accepted conferences, etc.)</li>
                                 <li>Annotated GA types: Original, Reused, Modified</li>
                             </list>
                         </div>
@@ -221,6 +416,7 @@
     </div>
 </section>
 <!-- End GA Sample -->
+
 
 
 <section class="section hero is-light">
@@ -234,7 +430,9 @@
                     </p>
                     <ul>
                         <li><b>Intra-GA Recommendation:</b> Identify the most suitable figure within a given paper to serve as a GA. This task enables automatic GA suggestion for research sharing platforms.</li>
+                        <img src="static/images/intra_GA_recommendation.png" alt="Overview of Intra-GA Recommendation"/>
                         <li><b>Inter-GA Recommendation:</b> Retrieve GAs from other papers to inspire the creation of a new GA for a given abstract. This encourages reuse of effective design patterns.</li>
+                        <img src="static/images/inter_GA_recommendation.png" alt="Overview of Inter-GA Recommendation"/>
                     </ul>
                     <p>
                         We benchmark several methods — including caption-aware retrieval using CLIP and Long-CLIP — showing that incorporating figure captions alongside visual features significantly boosts accuracy and consistency.
@@ -256,16 +454,15 @@
         <h2 class="title is-3 is-centered has-text-centered">
             📐 Confidence-aware Metric for Recommendation Tasks: CAR
         </h2>
-        <img src="static/images/car.png" alt="CAR score example"/>
+        <img src="static/images/CAR.png" alt="CAR score example"/>
         <div class="columns is-centered">
             <div class="column is-four-fifths">
                 <div class="content has-text-justified">
                     <p>
-                        Examples of Intra-GA Recommendation results demonstrating the intuition behind CAR@k scores.
-                        The yellow-highlighted figures represent GTs.
-                        Left: High CAR@k indicates the model confidently recommends the correct GA.
-                        Center: Medium CAR@k represents cases where multiple candidates are similarly plausible, resulting in lower confidence.
-                        Right: Low CAR@k reflects high model confidence but incorrect recommendations, highlighting mismatches between the model’s confidence and actual relevance.
+                      Illustration of CAR, our proposed recommendation metric.
+                      Each column shows predicted top-5 scores, with the GT highlighted in yellow.
+                      CAR assigns partial credit to understandable errors, similar to cases where the outcome is uncertain but still successful (red box), and evaluates clearly correct or incorrect predictions appropriately (blue box).
+                      Unlike R@<i>k</i> or nDCG, CAR assigns instance-level continuous scores without graded labels, based on the full score distribution, not just GT rank.
                     </p>
                 </div>
             </div>
@@ -276,27 +473,31 @@
 
 
 
-
-
-
-
 <!--BibTex citation -->
 <section class="section" id="BibTeX">
 <div class="container is-max-desktop content">
-<h2 class="title is-3 is-centered has-text-centered">BibTeX</h2>
-<pre>
+<div class="bibtex-header">
+  <h2 class="title">BibTeX</h2>
+  <button class="copy-bibtex-btn" onclick="copyBibTeX()" title="Copy BibTeX to clipboard">
+    <i class="fas fa-copy"></i>
+    <span class="copy-text">Copy</span>
+  </button>
+</div>
+<pre id="bibtex-code">
 <code>
-@article{kawada2025sciga,
+@inproceedings{kawada2026sciga,
     title={SciGA: A Comprehensive Dataset for Designing Graphical Abstracts in Academic Papers},
-    author={Takuro Kawada and Shunsuke Kitada and Sota Nemoto and Hitoshi Iyatomi},
-    journal={arXiv preprint arXiv:2507.02212},
-    year={2025}
+    author={Kawada, Takuro and Kitada, Shunsuke and Nemoto, Sota and Iyatomi, Hitoshi},
+    booktitle={the 2026 IEEE/CVF Conference on Computer Vision and Pattern Recognition - FINDINGS Track (CVPRF)},
+    year={2026}
 }
 </code>
 </pre>
 </div>
 </section>
 <!--End BibTex citation -->
+
+
 
 <footer class="footer">
     <div class="container">
