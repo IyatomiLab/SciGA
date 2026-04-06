@@ -19,7 +19,7 @@ Graphical Abstracts (GAs) play a crucial role in visually conveying the key find
 
 ## 📰 News
 
-🚀 [2026/07/03] Our paper has been accepted to _**CVPR Findings 2026**_<br>
+🚀 [2026/02/20] Our paper has been accepted to _**CVPR Findings 2026**_<br>
 🚀 [2025/07/03] Dataset, code, and models released<br>
 🚀 [2025/07/03] Paper available on arXiv<br>
 
