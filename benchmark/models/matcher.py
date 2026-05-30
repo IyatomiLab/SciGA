@@ -6,7 +6,8 @@ from pycocoevalcap.cider.cider import Cider
 import bm25s
 import Stemmer
 import evaluate
-
+from bert_score import score as bert_score
+from transformers import AutoTokenizer
 
 # ════════════════════════════════════════════════════════════
 # 📘 Intra-GA / 📙 Inter-GA Recommendation | (i) Abs2Cap
@@ -64,8 +65,8 @@ class Abs2CapMatcherWithCIDEr(BaseAbs2CapMatcher):
             return Abs2CapMatcherOutput(sim_abs2cap=sim_abs2cap)
 
         cider = Cider()
-        candidates = {i: [caption] for i, caption in enumerate(captions)}
-        references = {i: [abstract] for i in range(len(captions))}
+        candidates = {i: [caption.lower()] for i, caption in enumerate(captions)}
+        references = {i: [abstract.lower()] for i in range(len(captions))}
         _, cider_scores = cider.compute_score(candidates, references)
         sim_abs2cap = cider_scores.tolist()
 
@@ -118,24 +119,36 @@ class Abs2CapMatcherWithBERTScore(BaseAbs2CapMatcher):
     BERTScore () for Abs2Cap Matching
     """
 
-    def __init__(
-        self,
-        language: str,
-        batch_size: int,
-        device: str,
-    ):
+    def __init__(self, language: str, device: str):
         super().__init__()
-        # Load BERTScore model
         self.language = language
-        self.batch_size = batch_size
         self.device = device
+        self.model_type = "allenai/scibert_scivocab_uncased"
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_type)
+        self.max_length = 512
+
+    def _truncate(self, decoded: str) -> str:
+        encoded = self.tokenizer(
+            decoded,
+            truncation=True,
+            max_length=self.max_length-2,
+            add_special_tokens=False,
+            return_tensors=None,
+        )
+        decoded = self.tokenizer.decode(encoded["input_ids"], skip_special_tokens=True)
+        return decoded
 
     def match(self, abstract: str, captions: list[str]) -> Abs2CapMatcherOutput:
-        bert_score = evaluate.load('bertscore')
-        bert_score.add_batch(
-            predictions=captions,
-            references=[abstract] * len(captions),
+        abstract = self._truncate(abstract)
+        captions = [self._truncate(c) for c in captions]
+
+        P, R, F1 = bert_score(
+            captions,
+            [abstract] * len(captions),
+            lang="en-sci",
+            device=self.device,
+            batch_size=2048,
         )
-        sim_abs2cap = bert_score.compute(lang=self.language, device=self.device)['f1']
+        sim_abs2cap = F1.tolist()
 
         return Abs2CapMatcherOutput(sim_abs2cap=sim_abs2cap)

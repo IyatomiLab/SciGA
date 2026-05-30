@@ -33,6 +33,7 @@ class Experiment():
         SBERT_embeddings: dict[str, torch.Tensor],
         CLIP_embeddings: dict[str, torch.Tensor],
         DreamSim_embeddings: dict[str, torch.Tensor],
+        Aesthetics_scores: dict[str, float],
         args: Args
     ) -> None:
         self.experiment_name = args.experiment_name
@@ -40,6 +41,7 @@ class Experiment():
         self.SBERT_embeddings = SBERT_embeddings
         self.CLIP_embeddings = CLIP_embeddings
         self.DreamSim_embeddings = DreamSim_embeddings
+        self.Aesthetics_scores = Aesthetics_scores
         self.is_wandb = args.is_wandb
 
     @torch.inference_mode()
@@ -53,7 +55,7 @@ class Experiment():
 
         for j, paper_id in enumerate(tqdm(paper_ids, desc='   ' + desc, ncols=80)):
             # Perform retrieval
-            random_indices = random.sample(range(len(self.candidate_df)), 10)
+            random_indices = random.sample(range(len(self.candidate_df)), 30)
 
             # Save result
             for k in random_indices:
@@ -67,11 +69,12 @@ class Experiment():
 
         # Record score
         epoch_result = pd.DataFrame(epoch_result)
-        mean_field_precision, mean_abs2abs_SBERT, std_abs2abs_SBERT, mean_GA2GA_CLIPScore, std_GA2GA_CLIPScore, mean_GA2GA_DreamSim, std_GA2GA_DreamSim = metrics.evaluate_interGA_recommendation_metrics(
+        mean_field_precision, mean_abs2abs_SBERT, std_abs2abs_SBERT, mean_GA2GA_CLIPScore, std_GA2GA_CLIPScore, mean_GA2GA_DreamSim, std_GA2GA_DreamSim, mean_GA2GA_Aesthetics, std_GA2GA_Aesthetics, mean_pseudo_nDCG = metrics.evaluate_interGA_recommendation_metrics(
             epoch_result,
             SBERT_embeddings=self.SBERT_embeddings,
             CLIP_embeddings=self.CLIP_embeddings,
             DreamSim_embeddings=self.DreamSim_embeddings,
+            Aesthetics_scores=self.Aesthetics_scores,
         )
         epoch_score = {
             'Field-P@1': None,
@@ -86,6 +89,12 @@ class Experiment():
             'GA2GA_DreamSim@1': None,
             'GA2GA_DreamSim@5': (mean_GA2GA_DreamSim['5'], std_GA2GA_DreamSim['5']),
             'GA2GA_DreamSim@10': (mean_GA2GA_DreamSim['10'], std_GA2GA_DreamSim['10']),
+            'GA2GA_Aesthetics@1': None,
+            'GA2GA_Aesthetics@5': (mean_GA2GA_Aesthetics['5'], std_GA2GA_Aesthetics['5']),
+            'GA2GA_Aesthetics@10': (mean_GA2GA_Aesthetics['10'], std_GA2GA_Aesthetics['10']),
+            'GA2GA_pseudo_nDCG@5': mean_pseudo_nDCG['5'],
+            'GA2GA_pseudo_nDCG@10': mean_pseudo_nDCG['10'],
+            'GA2GA_pseudo_nDCG@30': mean_pseudo_nDCG['30'],
         }
 
         return epoch_score
@@ -182,12 +191,29 @@ def main(args: Args) -> None:
         print(f'\n📦 Loading DreamSim image embeddings from: \'{cache_path}\'...')
         DreamSim_embeddings = torch.load(cache_path)
 
+    # Load or Compute Aesthetics Predictor scores for GA Images
+    # NOTE: Use cached scores for fast GA2GA Aesthetics@k metric evaluation
+    cache_path = f'{save_cache_dir}aesthetics_scores.pt'
+    if not os.path.exists(cache_path):
+        print(f'\n💾 Compute and saving Aesthetics scores to: \'{cache_path}\'...')
+        Aesthetics_scores = metrics.save_Aesthetic_scores(
+            paper_ids=full_split['paper_id'].tolist(),
+            GA_paths=full_split['GA_path'].tolist(),
+            cache_path=cache_path,
+            device=device,
+            batch_size=batch_size,
+        )
+    else:
+        print(f'\n📦 Loading Aesthetics scores from: \'{cache_path}\'...')
+        Aesthetics_scores = torch.load(cache_path)
+
     # Run experiments
     experiment = Experiment(
         candidate_df=train,
         SBERT_embeddings=SBERT_embeddings,
         CLIP_embeddings=CLIP_embeddings,
         DreamSim_embeddings=DreamSim_embeddings,
+        Aesthetics_scores=Aesthetics_scores,
         args=args
     )
 

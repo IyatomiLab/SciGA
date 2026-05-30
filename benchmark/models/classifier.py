@@ -1,9 +1,9 @@
 import torch
 from torch import nn
 from .base import BaseGAClassifier
-from transformers import AutoImageProcessor, ViTForImageClassification, ConvNextV2ForImageClassification, SwinForImageClassification
+from transformers import AutoImageProcessor, ViTForImageClassification, ConvNextV2ForImageClassification, SwinForImageClassification, BatchEncoding
 import clip
-from torchvision import models
+from torchvision import models, transforms
 from PIL import Image, ImageFile
 
 
@@ -35,7 +35,17 @@ class ViTAsGAClassifier(BaseGAClassifier):
         return self.model
 
     def preprocess_image(self, image: Image.Image | ImageFile.ImageFile) -> torch.Tensor:
-        preprocessed_image = self.transform(image)
+        class CustomTransform(transforms.Compose):
+            def __init__(self, size: int = 224):
+                self.transform = transforms.Compose([
+                    transforms.Resize((size, size)),
+                    transforms.ToTensor(),
+                ])
+            
+            def __call__(self, image: Image) -> torch.Tensor:
+                return self.transform(image)
+        transform = CustomTransform()
+        preprocessed_image = transform(image)
         return preprocessed_image
 
     def _classify_image(self, image: torch.Tensor) -> torch.Tensor:
@@ -77,7 +87,17 @@ class CLIPImageEncoderAsGAClassifier(BaseGAClassifier):
         return _Backbone(self.image_encoder, self.mlp)
 
     def preprocess_image(self, image: Image.Image | ImageFile.ImageFile) -> torch.Tensor:
-        preprocessed_image = self.transform(image)
+        class CustomTransform(transforms.Compose):
+            def __init__(self, size: int = 224):
+                self.transform = transforms.Compose([
+                    transforms.Resize((size, size)),
+                    transforms.ToTensor(),
+                ])
+            
+            def __call__(self, image: Image) -> torch.Tensor:
+                return self.transform(image)
+        transform = CustomTransform()
+        preprocessed_image = transform(image)
         return preprocessed_image
 
     def _classify_image(self, image: torch.Tensor) -> torch.Tensor:
@@ -118,11 +138,21 @@ class EfficientNetV2AsGAClassifier(BaseGAClassifier):
         return self.model
 
     def preprocess_image(self, image: Image.Image | ImageFile.ImageFile) -> torch.Tensor:
-        preprocessed_image = self.transform(image)
+        class CustomTransform(transforms.Compose):
+            def __init__(self, size: int = 224):
+                self.transform = transforms.Compose([
+                    transforms.Resize((size, size)),
+                    transforms.ToTensor(),
+                ])
+            
+            def __call__(self, image: Image) -> torch.Tensor:
+                return self.transform(image)
+        transform = CustomTransform()
+        preprocessed_image = transform(image)
         return preprocessed_image
 
     def _classify_image(self, image: torch.Tensor) -> torch.Tensor:
-        logits = self.model(image).logits
+        logits = self.model(image)
         return logits
 
 
@@ -149,7 +179,17 @@ class ConvNeXtV2AsGAClassifier(BaseGAClassifier):
         return self.model
 
     def preprocess_image(self, image: Image.Image | ImageFile.ImageFile) -> torch.Tensor:
-        preprocessed_image = self.transform(image)
+        class CustomTransform(transforms.Compose):
+            def __init__(self, size: int = 224):
+                self.transform = transforms.Compose([
+                    transforms.Resize((size, size)),
+                    transforms.ToTensor(),
+                ])
+            
+            def __call__(self, image: Image) -> torch.Tensor:
+                return self.transform(image)
+        transform = CustomTransform()
+        preprocessed_image = transform(image)
         return preprocessed_image
 
     def _classify_image(self, image: torch.Tensor) -> torch.Tensor:
@@ -180,7 +220,17 @@ class SwinTransformerV2AsGAClassifier(BaseGAClassifier):
         return self.model
 
     def preprocess_image(self, image: Image.Image | ImageFile.ImageFile) -> torch.Tensor:
-        preprocessed_image = self.transform(image)
+        class CustomTransform(transforms.Compose):
+            def __init__(self, size: int = 224):
+                self.transform = transforms.Compose([
+                    transforms.Resize((size, size)),
+                    transforms.ToTensor(),
+                ])
+            
+            def __call__(self, image: Image) -> torch.Tensor:
+                return self.transform(image)
+        transform = CustomTransform()
+        preprocessed_image = transform(image)
         return preprocessed_image
 
     def _classify_image(self, image: torch.Tensor) -> torch.Tensor:

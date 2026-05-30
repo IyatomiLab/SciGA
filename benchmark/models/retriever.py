@@ -11,7 +11,7 @@ from .base import (
 import clip
 from benchmark.submodules.longclip import model as longclip
 import open_clip
-from transformers import Blip2ForImageTextRetrieval, AutoProcessor, BatchEncoding
+from transformers import Blip2ForImageTextRetrieval, CLIPImageProcessor, AutoProcessor, AutoModel, AutoConfig, AutoTokenizer, BatchEncoding
 from benchmark.submodules.x2vlm.models.model_retrieval import XVLMPlusForRetrieval
 from benchmark.submodules.x2vlm.dataset import build_tokenizer
 import yaml
@@ -138,6 +138,54 @@ class OpenCLIPAsAbs2FigRetrieverForIntraGARecommendation(BaseAbs2FigRetrieverFor
 
     def encode_image(self, image: torch.Tensor) -> torch.Tensor:
         encoded_image = self.model.encode_image(image)
+        return encoded_image
+
+    def _logit_scale(self):
+        return self.model.logit_scale
+    
+
+class SigLIP2AsAbs2FigRetrieverForIntraGARecommendation(BaseAbs2FigRetrieverForIntraGARecommendation):
+    """
+    SigLIP2 (https://doi.org/10.48550/arXiv.2212.07143) for Intra-GA Recommendation
+    """
+
+    def __init__(
+        self,
+        model_name: str,
+    ) -> None:
+        """
+        Loads SigLIP2 (https://huggingface.co/docs/hub/open_clip).
+        """
+
+        super().__init__()
+        self.model = AutoModel.from_pretrained(
+            "google/siglip2-base-patch16-224",
+            attn_implementation="sdpa"
+        )
+        self.processor = AutoProcessor.from_pretrained("google/siglip2-base-patch16-224")
+        self.tokenizer = AutoTokenizer.from_pretrained("google/siglip2-base-patch16-224")
+
+    def get_backbone(self) -> nn.Module:
+        return self.model
+
+    def tokenize(self, text: str | list[str], batched: bool = True) -> torch.Tensor:
+        tokenized_text = self.tokenizer(text, max_length=64, padding="max_length", truncation=True, return_tensors="pt")["input_ids"]
+        return tokenized_text
+
+    def preprocess_image(self, image: Image.Image | ImageFile.ImageFile) -> dict:
+        device = next(self.model.parameters()).device
+        dtype = next(self.model.parameters()).dtype
+
+        processed = self.processor(images=image, return_tensors="pt")["pixel_values"]
+        processed = processed.squeeze(0)
+        return processed
+    
+    def encode_text(self, text: dict) -> torch.Tensor:
+        encoded_text = self.model.get_text_features(text)
+        return encoded_text
+
+    def encode_image(self, image: dict) -> torch.Tensor:
+        encoded_image = self.model.get_image_features(image)
         return encoded_image
 
     def _logit_scale(self):
@@ -447,6 +495,53 @@ class OpenCLIPAsAbs2FigRetrieverForInterGARecommendation(BaseAbs2FigRetrieverFor
 
     def encode_image(self, image: torch.Tensor) -> torch.Tensor:
         encoded_image = self.model.encode_image(image)
+        return encoded_image
+
+    def _logit_scale(self):
+        return self.model.logit_scale
+
+class SigLIP2AsAbs2FigRetrieverForInterGARecommendation(BaseAbs2FigRetrieverForInterGARecommendation):
+    """
+    SigLIP2 (https://doi.org/10.48550/arXiv.2212.07143) for Inter-GA Recommendation
+    """
+
+    def __init__(
+        self,
+        model_name: str,
+    ) -> None:
+        """
+        Loads SigLIP2 (https://huggingface.co/docs/hub/open_clip).
+        """
+
+        super().__init__()
+        self.model = AutoModel.from_pretrained(
+            "google/siglip2-base-patch16-224",
+            attn_implementation="sdpa"
+        )
+        self.processor = AutoProcessor.from_pretrained("google/siglip2-base-patch16-224")
+        self.tokenizer = AutoTokenizer.from_pretrained("google/siglip2-base-patch16-224")
+
+    def get_backbone(self) -> nn.Module:
+        return self.model
+
+    def tokenize(self, text: str | list[str], batched: bool = True) -> torch.Tensor:
+        tokenized_text = self.tokenizer(text, max_length=64, padding="max_length", truncation=True, return_tensors="pt")["input_ids"]
+        return tokenized_text
+
+    def preprocess_image(self, image: Image.Image | ImageFile.ImageFile) -> dict:
+        device = next(self.model.parameters()).device
+        dtype = next(self.model.parameters()).dtype
+
+        processed = self.processor(images=image, return_tensors="pt")["pixel_values"]
+        processed = processed.squeeze(0)
+        return processed
+    
+    def encode_text(self, text: torch.Tensor) -> torch.Tensor:
+        encoded_text = self.model.get_text_features(text)
+        return encoded_text
+
+    def encode_image(self, image: torch.Tensor) -> torch.Tensor:
+        encoded_image = self.model.get_image_features(image)
         return encoded_image
 
     def _logit_scale(self):

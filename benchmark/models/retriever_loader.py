@@ -8,11 +8,13 @@ from .retriever import (
     CLIPAsAbs2FigRetrieverForIntraGARecommendation,
     LongCLIPAsAbs2FigRetrieverForIntraGARecommendation,
     OpenCLIPAsAbs2FigRetrieverForIntraGARecommendation,
+    SigLIP2AsAbs2FigRetrieverForIntraGARecommendation,
     BLIP2AsAbs2FigRetrieverForIntraGARecommendation,
     X2VLMAsAbs2FigRetrieverForIntraGARecommendation,
     CLIPAsAbs2FigRetrieverForInterGARecommendation,
     LongCLIPAsAbs2FigRetrieverForInterGARecommendation,
     OpenCLIPAsAbs2FigRetrieverForInterGARecommendation,
+    SigLIP2AsAbs2FigRetrieverForInterGARecommendation,
     BLIP2AsAbs2FigRetrieverForInterGARecommendation,
     X2VLMAsAbs2FigRetrieverForInterGARecommendation,
 )
@@ -95,6 +97,18 @@ class OpenCLIPAsAbs2FigRetrieverLoaderForIntraGARecommendation(BaseAbs2FigRetrie
 
     def _load(self) -> OpenCLIPAsAbs2FigRetrieverForIntraGARecommendation:
         return OpenCLIPAsAbs2FigRetrieverForIntraGARecommendation(self.model_name)
+    
+
+class SigLIP2AsAbs2FigRetrieverLoaderForIntraGARecommendation(BaseAbs2FigRetrieverLoaderForIntraGARecommendation):
+    model_type = 'SigLIP-2'
+    default_model_name = 'google/siglip2-large-patch16-512'
+
+    def __init__(self, model_name: str = None, **kwargs) -> None:
+        super().__init__(model_name=model_name)
+
+    def _load(self) -> SigLIP2AsAbs2FigRetrieverForIntraGARecommendation:
+        return SigLIP2AsAbs2FigRetrieverForIntraGARecommendation(self.model_name)
+
 
 
 class BLIP2AsAbs2FigRetrieverLoaderForIntraGARecommendation(BaseAbs2FigRetrieverLoaderForIntraGARecommendation):
@@ -110,8 +124,8 @@ class BLIP2AsAbs2FigRetrieverLoaderForIntraGARecommendation(BaseAbs2FigRetriever
 
 class X2VLMAsAbs2FigRetrieverLoaderForIntraGARecommendation(BaseAbs2FigRetrieverLoaderForIntraGARecommendation):
     model_type = 'X2-VLM'
-    default_model_name = './weights/pretrained/x2vlm_large_4m.th'
-    default_model_config_path = './model_configs/x2vlm_large_4m_for_SciGA.yaml'
+    default_model_name = './output/checkpoints/X2-VLM/x2vlm_large_4m.th'
+    default_model_config_path = './benchmarks/model_configs/x2vlm_large_4m_for_SciGA.yaml'
 
     def __init__(self, model_name: str = None, **kwargs) -> None:
         model_config_path = kwargs.pop('model_config_path', None)
@@ -164,7 +178,7 @@ def load_abs2fig_retriever_for_inter_GA_recommendation(
     model = model_loader.get_model()
 
     if ckpt_path:
-        state_dict = torch.load(ckpt_path)
+        state_dict = torch.load(ckpt_path, map_location="cpu")
         model.get_backbone().load_state_dict(state_dict)
 
     return model
@@ -202,6 +216,15 @@ class OpenCLIPAsAbs2FigRetrieverLoaderForInterGARecommendation(BaseAbs2FigRetrie
     def _load(self) -> OpenCLIPAsAbs2FigRetrieverForInterGARecommendation:
         return OpenCLIPAsAbs2FigRetrieverForInterGARecommendation(self.model_name)
 
+class SigLIP2AsAbs2FigRetrieverLoaderForInterGARecommendation(BaseAbs2FigRetrieverLoaderForInterGARecommendation):
+    model_type = 'SigLIP-2'
+    default_model_name = 'google/siglip2-large-patch16-512'
+
+    def __init__(self, model_name: str = None, **kwargs) -> None:
+        super().__init__(model_name=model_name)
+
+    def _load(self) -> SigLIP2AsAbs2FigRetrieverForInterGARecommendation:
+        return SigLIP2AsAbs2FigRetrieverForInterGARecommendation(self.model_name)
 
 class BLIP2AsAbs2FigRetrieverLoaderForInterGARecommendation(BaseAbs2FigRetrieverLoaderForInterGARecommendation):
     model_type = 'BLIP-2'

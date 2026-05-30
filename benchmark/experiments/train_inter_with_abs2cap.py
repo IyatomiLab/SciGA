@@ -36,6 +36,7 @@ class Experiment():
         SBERT_embeddings: dict[str, torch.Tensor],
         CLIP_embeddings: dict[str, torch.Tensor],
         DreamSim_embeddings: dict[str, torch.Tensor],
+        Aesthetics_scores: dict[str, torch.Tensor],
         args: Args
     ) -> None:
         self.experiment_name = args.experiment_name
@@ -44,6 +45,7 @@ class Experiment():
         self.SBERT_embeddings = SBERT_embeddings
         self.CLIP_embeddings = CLIP_embeddings
         self.DreamSim_embeddings = DreamSim_embeddings
+        self.Aesthetics_scores = Aesthetics_scores
         self.is_wandb = args.is_wandb
 
     @torch.inference_mode()
@@ -68,8 +70,8 @@ class Experiment():
         for j, paper_id in enumerate(paper_ids):
             sim_abs2cap = torch.tensor(output[j])
             probs, preds = sim_abs2cap.sort(dim=-1, descending=True)
-            probs = probs[:10]
-            preds = preds[:10]
+            probs = probs[:30]
+            preds = preds[:30]
 
             for k, prob in zip(preds, probs):
                 k = k.item()
@@ -84,11 +86,12 @@ class Experiment():
 
         # Record score
         epoch_result = pd.DataFrame(epoch_result)
-        mean_field_precision, mean_abs2abs_SBERT, std_abs2abs_SBERT, mean_GA2GA_CLIPScore, std_GA2GA_CLIPScore, mean_GA2GA_DreamSim, std_GA2GA_DreamSim = metrics.evaluate_interGA_recommendation_metrics(
+        mean_field_precision, mean_abs2abs_SBERT, std_abs2abs_SBERT, mean_GA2GA_CLIPScore, std_GA2GA_CLIPScore, mean_GA2GA_DreamSim, std_GA2GA_DreamSim, mean_GA2GA_Aesthetics, std_GA2GA_Aesthetics, mean_pseudo_nDCG = metrics.evaluate_interGA_recommendation_metrics(
             epoch_result,
             SBERT_embeddings=self.SBERT_embeddings,
             CLIP_embeddings=self.CLIP_embeddings,
             DreamSim_embeddings=self.DreamSim_embeddings,
+            Aesthetics_scores=self.Aesthetics_scores,
         )
         epoch_score = {
             'Field-P@1': None,
@@ -103,6 +106,12 @@ class Experiment():
             'GA2GA_DreamSim@1': None,
             'GA2GA_DreamSim@5': (mean_GA2GA_DreamSim['5'], std_GA2GA_DreamSim['5']),
             'GA2GA_DreamSim@10': (mean_GA2GA_DreamSim['10'], std_GA2GA_DreamSim['10']),
+            'GA2GA_Aesthetics@1': None,
+            'GA2GA_Aesthetics@5': (mean_GA2GA_Aesthetics['5'], std_GA2GA_Aesthetics['5']),
+            'GA2GA_Aesthetics@10': (mean_GA2GA_Aesthetics['10'], std_GA2GA_Aesthetics['10']),
+            'GA2GA_pseudo_nDCG@5': mean_pseudo_nDCG['5'],
+            'GA2GA_pseudo_nDCG@10': mean_pseudo_nDCG['10'],
+            'GA2GA_pseudo_nDCG@30': mean_pseudo_nDCG['30'],
         }
 
         return epoch_score
@@ -130,7 +139,7 @@ def main(args: Args) -> None:
 
     # Load dataset
     print(f'\n📦 Loading dataset from: \'{dataset_json_dir}\'...')
-    full_sprit = datasets.load_and_prepare_split(
+    full_split = datasets.load_and_prepare_split(
         split_name='dataset',
         dataset_json_dir=dataset_json_dir,
         dataset_figure_dir=dataset_figure_dir,
@@ -162,8 +171,8 @@ def main(args: Args) -> None:
     if not os.path.exists(cache_path):
         print(f'\n💾 Encode and saving SBERT text embeddings to: \'{cache_path}\'...')
         SBERT_embeddings = metrics.save_SBERT_embeddings(
-            paper_ids=full_sprit['paper_id'].tolist(),
-            abstracts=full_sprit['abstract'].tolist(),
+            paper_ids=full_split['paper_id'].tolist(),
+            abstracts=full_split['abstract'].tolist(),
             cache_path=cache_path,
             model_name='sentence-transformers/all-MiniLM-L6-v2',
             device=device,
@@ -179,8 +188,8 @@ def main(args: Args) -> None:
     if not os.path.exists(cache_path):
         print(f'\n💾 Encode and saving CLIP text embeddings to: \'{cache_path}\'...')
         CLIP_embeddings = metrics.save_CLIP_embeddings(
-            paper_ids=full_sprit['paper_id'].tolist(),
-            GA_paths=full_sprit['GA_path'].tolist(),
+            paper_ids=full_split['paper_id'].tolist(),
+            GA_paths=full_split['GA_path'].tolist(),
             cache_path=cache_path,
             model_name='ViT-L/14',
             device=device,
@@ -196,8 +205,8 @@ def main(args: Args) -> None:
     if not os.path.exists(cache_path):
         print(f'\n💾 Encode and saving DreamSim text embeddings to: \'{cache_path}\'...')
         DreamSim_embeddings = metrics.save_DreamSim_embeddings(
-            paper_ids=full_sprit['paper_id'].tolist(),
-            GA_paths=full_sprit['GA_path'].tolist(),
+            paper_ids=full_split['paper_id'].tolist(),
+            GA_paths=full_split['GA_path'].tolist(),
             cache_path=cache_path,
             device=device,
             batch_size=batch_size,
@@ -206,6 +215,23 @@ def main(args: Args) -> None:
         print(f'\n📦 Loading DreamSim image embeddings from: \'{cache_path}\'...')
         DreamSim_embeddings = torch.load(cache_path)
 
+    # Load or Compute Aesthetics Predictor scores for GA Images
+    # NOTE: Use cached scores for fast GA2GA Aesthetics@k metric evaluation
+    cache_path = f'{save_cache_dir}aesthetics_scores.pt'
+    if not os.path.exists(cache_path):
+        print(f'\n💾 Compute and saving Aesthetics scores to: \'{cache_path}\'...')
+        Aesthetics_scores = metrics.save_Aesthetic_scores(
+            paper_ids=full_split['paper_id'].tolist(),
+            GA_paths=full_split['GA_path'].tolist(),
+            cache_path=cache_path,
+            device=device,
+            batch_size=batch_size,
+        )
+    else:
+        print(f'\n📦 Loading Aesthetics scores from: \'{cache_path}\'...')
+        Aesthetics_scores = torch.load(cache_path)
+
+
     # Run experiments
     experiment = Experiment(
         model=model,
@@ -213,6 +239,7 @@ def main(args: Args) -> None:
         SBERT_embeddings=SBERT_embeddings,
         CLIP_embeddings=CLIP_embeddings,
         DreamSim_embeddings=DreamSim_embeddings,
+        Aesthetics_scores=Aesthetics_scores,
         args=args
     )
 

@@ -97,23 +97,19 @@ class Abs2CapMatcherLoaderWithBM25(BaseAbs2CapMatcherLoader):
 
 class Abs2CapMatcherLoaderWithBERTScore(BaseAbs2CapMatcherLoader):
     model_type = 'BERTScore'
-    default_model_name = 'bert-base-uncased'
-    default_num_layers = 12
-    default_batch_size = 32
+    default_language = 'en-sci'
+    default_device = 'cuda'
 
     def __init__(self, model_name: str = None, num_layers: int = None, batch_size: int = None, **kwargs):
-        model_name = kwargs.get('model_name', None)
-        self.model_name = model_name or self.default_model_name
-        num_layers = kwargs.get('num_layers', None)
-        self.num_layers = num_layers or self.default_num_layers
-        batch_size = kwargs.get('batch_size', None)
-        self.batch_size = batch_size or self.default_batch_size
+        language = kwargs.get('language', None)
+        self.language = language or self.default_language
+        device = kwargs.get('device', None)
+        self.device = device or self.default_device
 
         super().__init__()
 
     def _load(self) -> BaseAbs2CapMatcher:
         return Abs2CapMatcherWithBERTScore(
-            model_name=self.model_name,
-            num_layers=self.num_layers,
-            batch_size=self.batch_size,
+            language=self.language,
+            device=self.device,
         )

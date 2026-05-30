@@ -116,12 +116,13 @@ class Experiment():
 
             # Record score
             epoch_result = pd.DataFrame(epoch_result)
-            recall, mrr, car, car_above05 = metrics.evaluate_intraGA_recommendation_metrics(epoch_result)
+            recall, mrr, nDCG, car, car_above05 = metrics.evaluate_intraGA_recommendation_metrics(epoch_result)
             epoch_score = {
                 'R@1': recall['1'],
                 'R@2': recall['2'],
                 'R@3': recall['3'],
                 'MRR': mrr,
+                'nDCG': nDCG,
                 'CAR@5': car['5'],
                 'CAR@5_above_0.5': car_above05['5'],
             }
@@ -207,12 +208,13 @@ class Experiment():
 
         # Record score
         epoch_result = pd.DataFrame(epoch_result)
-        recall, mrr, car, car_above05 = metrics.evaluate_intraGA_recommendation_metrics(epoch_result)
+        recall, mrr, nDCG, car, car_above05 = metrics.evaluate_intraGA_recommendation_metrics(epoch_result)
         epoch_score = {
             'R@1': recall['1'],
             'R@2': recall['2'],
             'R@3': recall['3'],
             'MRR': mrr,
+            'nDCG': nDCG,
             'CAR@5': car['5'],
             'CAR@5_above_0.5': car_above05['5'],
         }

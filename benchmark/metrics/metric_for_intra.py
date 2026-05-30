@@ -38,6 +38,28 @@ def _reciprocal_rank(preds: List[str], GT: List[str]) -> float:
     return 0
 
 
+def _nDCG_at_k(preds: List[str], GT: List[str], k: int) -> float:
+    """
+    Compute Normalized Discounted Cumulative Gain (nDCG) at k.
+
+    Args:
+        preds (List[str]): Ranked list of predicted item IDs.
+        GT (List[str]): List of ground-truth item IDs.
+        k (int): Cutoff rank for computing nDCG.
+
+    Returns:
+        float: nDCG@k score, a value between 0 and 1.
+    """
+    DCG = 0.0
+    for i, pred in enumerate(preds[:k]):
+        if pred in GT:
+            DCG += 1 / torch.log2(torch.tensor(i + 2, dtype=torch.float32))
+    
+    IDCG = sum(1 / torch.log2(torch.tensor(i + 2, dtype=torch.float32)) for i in range(min(len(GT), k)))
+    
+    return DCG / IDCG if IDCG > 0 else 0.0
+
+
 def evaluate_intraGA_recommendation_metrics(
     result_df: pd.DataFrame,
     k_for_recall: List[int] = [1, 2, 3],
@@ -68,7 +90,10 @@ def evaluate_intraGA_recommendation_metrics(
 
     recall = {str(k): [] for k in k_for_recall}
     rr = []
+    nDCG = []
     car_k = {str(k): [] for k in k_for_car}
+
+    save_data = []
 
     for paper_id, paper_df in result_df.groupby('paper_id'):
         # Aggregate subfigure predictions and retain the one with the highest probability for each figure
@@ -88,9 +113,24 @@ def evaluate_intraGA_recommendation_metrics(
             recall[str(k)].append(_recall_at_k(preds, GT, k))
 
         rr.append(_reciprocal_rank(preds, GT))
+        nDCG.append(_nDCG_at_k(preds, GT, k=5))
 
         for k in k_for_car:
             car_k[str(k)].append(confidence_adjusted_top1_gt_ratio(probs, k, preds.index('GA'), alpha_for_car))
+
+            if car_k[str(k)][-1] > 0.9:
+                print(f"High CAR@{k} for paper {paper_id}: {car_k[str(k)][-1]}")
+        
+        # PaperID, Top-K の preds, CAR@5 をjsonで保存する
+        save_data.append({
+            'paper_id': paper_id,
+            'preds': preds,
+            'probs': probs,
+            'GT': GT,
+            'CAR@5': car_k['5'][-1],
+        })
+
+
 
     # Calculate mean metrics across all papers
     mean_recall = {
@@ -98,6 +138,7 @@ def evaluate_intraGA_recommendation_metrics(
         for k, score in recall.items()
     }
     mean_rr = torch.tensor(rr).mean().item()
+    mean_nDCG = torch.tensor(nDCG).mean().item()
     mean_car = {
         k: torch.tensor(score).mean().item()
         for k, score in car_k.items()
@@ -107,4 +148,9 @@ def evaluate_intraGA_recommendation_metrics(
         for k, scores in car_k.items()
     }
 
-    return mean_recall, mean_rr, mean_car, car_above_05
+    # Save detailed results to a CSV file
+    save_df = pd.DataFrame(save_data)
+    save_df.to_csv('intraGA_recommendation_detailed_results.csv', index=False)
+
+
+    return mean_recall, mean_rr, mean_nDCG, mean_car, car_above_05
